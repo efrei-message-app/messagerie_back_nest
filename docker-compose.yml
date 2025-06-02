@@ -1,0 +1,35 @@
+# docker-compose.yml
+
+version: '3.8'
+services:
+
+  postgres:
+    image: postgres:13.5
+    container_name: db
+    restart: always
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=messagerie-db
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+  api:
+    build: .
+    container_name: messagerie_back_nest
+    env_file:
+      - .env
+    ports:
+      - 3000:3000
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+
+volumes:
+  postgres:
+
