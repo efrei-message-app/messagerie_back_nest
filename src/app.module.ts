@@ -8,9 +8,18 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { PrismaModule } from './prisma/prisma.module';
+import { UserModule } from './user/user.module';
+import { MessageModule } from './message/message.module';
+import { ConversationModule } from './conversation/conversation.module';
 
 @Module({
-  imports: [HealthModule, ConfigModule.forRoot(), PrismaModule,
+  imports: [
+    HealthModule, 
+    ConfigModule.forRoot(), 
+    PrismaModule,
+    UserModule,
+    MessageModule,
+    ConversationModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
