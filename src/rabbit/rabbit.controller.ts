@@ -1,8 +1,9 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UsePipes, ValidationPipe } from '@nestjs/common';
 import { RabbitService } from './rabbit.service';
 import { NotificationDto } from './rabbit.dto';
 
 @Controller('rabbit')
+@UsePipes(new ValidationPipe({ whitelist: true }))
 export class RabbitController {
   constructor(private readonly rabbitService: RabbitService) {}
 

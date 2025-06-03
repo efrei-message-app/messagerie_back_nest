@@ -2,34 +2,33 @@ import { Injectable } from '@nestjs/common';
 import {
   ClientProxy,
   ClientProxyFactory,
-  EventPattern,
-  Payload,
   Transport,
+  RmqOptions,
 } from '@nestjs/microservices';
 import { NotificationDto } from './rabbit.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RabbitService {
   private client: ClientProxy;
 
-  constructor() {
-    this.client = ClientProxyFactory.create({
+  constructor(private readonly configService: ConfigService) {
+    const rmqOptions: RmqOptions = {
       transport: Transport.RMQ,
       options: {
-        urls: ['amqp://rabbitmq:5672'],
-        queue: 'channel_message',
+        urls: [this.configService.get<string>('RABBITMQ_URL') || 'amqp://localhost:5672'],
+        queue: this.configService.get<string>('RABBITMQ_QUEUE')!,
       },
-    });
+    };
+
+    this.client = ClientProxyFactory.create(rmqOptions);
   }
 
   async sendNotification(notification: NotificationDto) {
-    return await this.client
-      .emit('messages.send', notification)
-      .toPromise();
+    return this.client.emit('messages.send', notification).toPromise();
   }
 
-  @EventPattern('messages.send') 
-  async handleIncomingMessage(@Payload() message: any) {
+  async handleIncomingMessage(message: any) {
     console.log('Message reçu via RabbitMQ:', message);
   }
 }
