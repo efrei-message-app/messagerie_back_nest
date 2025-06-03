@@ -2,10 +2,12 @@ import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
 export class CreateConversationInput {
-  // Pas besoin d'id, il sera généré par Prisma
+  @Field(() => [String])
+  participantIds: string[]; // ou [ID], selon ton entity User
 }
 
 @InputType()
 export class UpdateConversationInput {
-  // Si tu veux mettre à jour la date ou autre, sinon vide
+  @Field({ nullable: true })
+  dummyField?: string; // à adapter quand tu feras des updates réelles
 }
