@@ -1,11 +1,16 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, ResolveField, Parent } from '@nestjs/graphql';
 import { ConversationParticipantService } from './conversation-participant.service';
 import { CreateConversationParticipantInput } from './dto/conversation-participant.input';
 import { ConversationParticipant } from './entities/conversation-participant.entity';
+import { User } from 'src/user/entities/user.entity';
+import { UserService } from 'src/user/user.service';
 
 @Resolver(() => ConversationParticipant)
 export class ConversationParticipantResolver {
-  constructor(private readonly conversationParticipantService: ConversationParticipantService) {}
+  constructor(
+    private readonly conversationParticipantService: ConversationParticipantService,
+    private readonly userService: UserService
+  ) {}
 
   @Query(() => [ConversationParticipant], { name: 'conversationParticipants' })
   findAll() {
@@ -32,4 +37,10 @@ export class ConversationParticipantResolver {
   ) {
     return this.conversationParticipantService.remove(userId, conversationId);
   }
+
+  @ResolveField(() => User, { nullable: true })
+  async user(@Parent() participant: ConversationParticipant): Promise<User | null> {
+    return this.userService.findOne(participant.userId);
+  } 
+  
 }

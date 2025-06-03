@@ -1,6 +1,5 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { Message } from 'src/message/entities/message.entity';
-import { User } from 'src/user/entities/user.entity';
+import { ConversationParticipant } from '../../conversation-participant/entities/conversation-participant.entity';
 
 @ObjectType()
 export class Conversation {
@@ -13,9 +12,6 @@ export class Conversation {
   @Field()
   updatedAt: Date;
 
-  @Field(() => [User], { nullable: 'items' })
-  participants?: User[];
-
-  @Field(() => [Message], { nullable: 'items' })
-  messages?: Message[];
+  @Field(() => [ConversationParticipant])
+  participants: ConversationParticipant[];
 }

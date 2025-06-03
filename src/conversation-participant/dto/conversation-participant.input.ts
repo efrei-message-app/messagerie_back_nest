@@ -8,8 +8,3 @@ export class CreateConversationParticipantInput {
   @Field()
   conversationId: string;
 }
-
-@InputType()
-export class UpdateConversationParticipantInput {
-  // Pas de champs modifiables pour cette entité, la clé est composite
-}
