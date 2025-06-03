@@ -2,9 +2,14 @@ import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
 import { Message } from 'src/message/entities/message.entity';
 import { MessageService } from './message.service';
 import { CreateMessageInput } from './message.dto';
+import { RabbitService } from 'src/rabbit/rabbit.service';
+import { MessageResponse } from './dto/message.input';
 @Resolver(() => Message)
 export class MessageResolver {
-    constructor(private readonly messageService: MessageService) { }
+    constructor(
+        private readonly messageService: MessageService,
+        private readonly rabbitService : RabbitService
+    ) { }
 
     @Query(() => [Message], { name: 'messages' })
     findAll() {
@@ -16,8 +21,9 @@ export class MessageResolver {
         return this.messageService.findOne(id);
     }
 
-    @Mutation(() => Message)
-    createMessage(@Args('data') data: CreateMessageInput) {
-        return this.messageService.create(data);
+    @Mutation(() => MessageResponse)
+    async createMessage(@Args('data') data: CreateMessageInput) {
+        await this.rabbitService.sendNotification(data,"message.create");
+        return { status: 'Message envoyé dans RabbitMQ' };
     }
 }

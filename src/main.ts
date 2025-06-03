@@ -11,8 +11,9 @@ async function bootstrap() {
       urls: ['amqp://rabbitmq:5672'],
       queue: 'channel_message',
       queueOptions: { durable: true },
-    },
-  });
+      noAck : false
+    }
+    });
 
   await app.startAllMicroservices(); 
   await app.listen(3000);

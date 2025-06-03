@@ -5,7 +5,6 @@ import {
   Transport,
   RmqOptions,
 } from '@nestjs/microservices';
-import { NotificationDto } from './rabbit.dto';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -24,7 +23,7 @@ export class RabbitService {
     this.client = ClientProxyFactory.create(rmqOptions);
   }
 
-  async sendNotification(notification: NotificationDto, routingKey : string) {
+  async sendNotification(notification: any, routingKey : string) {
     console.log(routingKey)
     return this.client.emit(routingKey, notification);
   }
