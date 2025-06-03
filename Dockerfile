@@ -14,6 +14,7 @@ RUN npm install
 # Copy the rest of the application files
 COPY . .
 
+
 # Build the NestJS application
 RUN npm run build
 
@@ -21,4 +22,4 @@ RUN npm run build
 EXPOSE 3000
 
 # Command to run the application
-CMD ["node", "dist/main"]
+CMD ["sh", "./entrypoint.sh"]

@@ -1,9 +1,13 @@
-import { IsEmail, IsString, IsUUID } from 'class-validator';
+import { InputType, Field } from '@nestjs/graphql';
 
-export class MessageDTO {
-  @IsString()
-  message: string;
+@InputType()
+export class CreateMessageInput {
+  @Field()
+  content: string;
 
-  @IsUUID()
-  convID: string;
+  @Field()
+  senderId: string;
+
+  @Field()
+  conversationId: string;
 }
