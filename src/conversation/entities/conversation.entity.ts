@@ -13,8 +13,8 @@ export class Conversation {
   @Field()
   updatedAt: Date;
 
-  @Field(() => [User], { nullable: 'items' })
-  participants?: User[];
+  @Field(() => [User])
+  participants: User[];
 
   @Field(() => [Message], { nullable: 'items' })
   messages?: Message[];

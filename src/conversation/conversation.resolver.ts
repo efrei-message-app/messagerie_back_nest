@@ -18,13 +18,13 @@ export class ConversationResolver {
     }
 
     @Mutation(() => Conversation)
-    createConversation(@Args('data') data: CreateConversationInput) {
-        return this.conversationService.create(data);
+    createConversation(@Args('createConversationInput') createConversationInput: CreateConversationInput) {
+        return this.conversationService.create(createConversationInput);
     }
 
     @Mutation(() => Conversation)
-    updateConversation(@Args('id') id: string, @Args('data') data: UpdateConversationInput) {
-        return this.conversationService.update(id, data);
+    updateConversation(@Args('id') id: string, @Args('updateConversationInput') updateConversationInput: UpdateConversationInput) {
+        return this.conversationService.update(id, updateConversationInput);
     }
 
     @Mutation(() => Conversation)
