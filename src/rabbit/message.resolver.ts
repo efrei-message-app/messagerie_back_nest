@@ -9,8 +9,9 @@ export class MessageResolver {
   async sendMessage(
     @Args('email') email: string,
     @Args('message') message: string,
+    @Args('routingKey') routingKey: string,
   ) {
-    await this.rabbitService.sendNotification({ email, message });
+    await this.rabbitService.sendNotification({ email, message }, routingKey);
     return 'Message envoyé via RabbitMQ';
   }
 }

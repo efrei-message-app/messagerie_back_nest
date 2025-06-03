@@ -9,7 +9,7 @@ export class RabbitController {
 
   @Post('send')
   async send(@Body() payload: NotificationDto) {
-    await this.rabbitService.sendNotification(payload);
+    await this.rabbitService.sendNotification(payload,"message.create");
     return { status: 'Message envoyé dans RabbitMQ' };
   }
 }

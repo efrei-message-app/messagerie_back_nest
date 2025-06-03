@@ -24,11 +24,9 @@ export class RabbitService {
     this.client = ClientProxyFactory.create(rmqOptions);
   }
 
-  async sendNotification(notification: NotificationDto) {
-    return this.client.emit('messages.send', notification).toPromise();
+  async sendNotification(notification: NotificationDto, routingKey : string) {
+    console.log(routingKey)
+    return this.client.emit(routingKey, notification);
   }
 
-  async handleIncomingMessage(message: any) {
-    console.log('Message reçu via RabbitMQ:', message);
-  }
 }
