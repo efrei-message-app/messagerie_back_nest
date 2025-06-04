@@ -14,7 +14,26 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - '5432:5432' 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 5672:5672
+      - 15672:15672
+      - 15692:15692
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+      - rabbitmq-log:/var/log/rabbitmq
+
   api:
     build: .
     container_name: messagerie_back_nest
@@ -22,6 +41,13 @@ services:
       - .env
     ports:
       - 3000:3000
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+
+
   adminer:
     image: adminer
     restart: always
@@ -32,4 +58,6 @@ services:
 
 volumes:
   postgres:
+  rabbitmq-data:
+  rabbitmq-log:
 

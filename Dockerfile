@@ -14,6 +14,10 @@ RUN npm install
 # Copy the rest of the application files
 COPY . .
 
+RUN sed -i 's/\r$//' entrypoint.sh
+
+RUN npx prisma generate
+
 # Build the NestJS application
 RUN npm run build
 
@@ -21,4 +25,4 @@ RUN npm run build
 EXPOSE 3000
 
 # Command to run the application
-CMD ["node", "dist/main"]
+CMD ["sh", "./entrypoint.sh"]

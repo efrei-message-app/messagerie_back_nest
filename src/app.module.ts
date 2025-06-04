@@ -3,14 +3,27 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppResolver } from './app.resolver';
 import { HealthModule } from './health/health.module';
+import { MessageModule } from './message/message.module';
 import { ConfigModule } from '@nestjs/config';
-import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { join } from 'path';
+import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RabbitModule } from './rabbit/rabbit.module';
+import { ConversationModule } from './conversation/conversation.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { join } from 'path';
 
 @Module({
-  imports: [HealthModule, ConfigModule.forRoot(), PrismaModule,
+  imports: [
+    
+    ConfigModule.forRoot({ isGlobal: true }),
+    HealthModule,
+    MessageModule,
+    RabbitModule,
+    PrismaModule,
+    UserModule,
+    MessageModule,
+    ConversationModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
