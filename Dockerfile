@@ -14,6 +14,8 @@ RUN npm install
 # Copy the rest of the application files
 COPY . .
 
+RUN sed -i 's/\r$//' entrypoint.sh
+
 RUN npx prisma generate
 
 # Build the NestJS application
