@@ -1,3 +1,4 @@
+// src/user/dto/user.input.ts
 import { InputType, Field } from '@nestjs/graphql';
 
 @InputType()
@@ -7,6 +8,9 @@ export class CreateUserInput {
 
   @Field()
   username: string;
+
+  @Field()
+  password: string; 
 }
 
 @InputType()
@@ -16,4 +20,7 @@ export class UpdateUserInput {
 
   @Field({ nullable: true })
   username?: string;
+
+  @Field({ nullable: true })
+  password?: string; 
 }
