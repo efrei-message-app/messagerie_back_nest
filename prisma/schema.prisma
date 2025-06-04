@@ -8,34 +8,34 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  username      String
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id        String   @id @default(uuid())
+  email     String   @unique
+  username  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   messages      Message[]
   conversations Conversation[] @relation("Participants") // many-to-many
 }
 
 model Conversation {
-  id            String         @id @default(uuid())
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  messages      Message[]
-  participants  User[]         @relation("Participants") // many-to-many
+  messages     Message[]
+  participants User[]    @relation("Participants") // many-to-many
 }
 
 model Message {
-  id              String       @id @default(uuid())
-  content         String
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  senderId        String
-  conversationId  String
+  senderId       String
+  conversationId String
 
-  sender          User         @relation(fields: [senderId], references: [id])
-  conversation    Conversation @relation(fields: [conversationId], references: [id])
+  sender       User         @relation(fields: [senderId], references: [id])
+  conversation Conversation @relation(fields: [conversationId], references: [id])
 }

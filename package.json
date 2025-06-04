@@ -22,6 +22,8 @@
   "dependencies": {
     "@apollo/server": "^4.12.1",
     "@nestjs/apollo": "^13.1.0",
+    "@apollo/server": "^4.12.1",
+    "@nestjs/apollo": "^13.1.0",
     "@nestjs/axios": "^4.0.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
