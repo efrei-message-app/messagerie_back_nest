@@ -3,6 +3,7 @@ import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { CreateMessageInput } from './message.dto';
 import { MessageService } from './message.service';
 import { UserService } from 'src/user/user.service';
+import { MessageResponse } from './dto/message.input';
 
 @Controller('message')
 export class MessageController {
@@ -26,7 +27,7 @@ export class MessageController {
 
       }
 
-      async deleteMessage(mail : string, messageId : string){
+      async deleteMessage(mail : string, messageId : string) : Promise<MessageResponse>{
         try {
           // Find user 
             const user = await this.userService.findOneByMail(mail)
@@ -54,7 +55,7 @@ export class MessageController {
           // Else 
             await this.messageService.delete(message)
 
-            return { message: 'Message supprimé avec succès' };
+            return { status: 'Message supprimé avec succès' };
           
         } catch (error) {
            throw error; 

@@ -4,8 +4,11 @@ import { MessageService } from './message.service';
 import { CreateMessageInput } from './message.dto';
 import { RabbitService } from 'src/rabbit/rabbit.service';
 import { MessageResponse } from './dto/message.input';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
 import { MessageController } from './message.controller';
+import { UserGuard } from 'src/auth/auth.guard';
+import { CurrentUser } from 'src/auth/auth.decorator';
+import { User } from 'src/user/entities/user.entity';
 @Resolver(() => Message)
 export class MessageResolver {
     constructor(
@@ -38,11 +41,12 @@ export class MessageResolver {
         }
     }
         @Mutation(() => MessageResponse)
+        @UseGuards(UserGuard)
         async deleteMessage(
         @Args('id', { type: () => String }) id: string,
-        @Args('mail', { type: () => String }) mail: string,
+        @CurrentUser() user : User, 
         ): Promise<MessageResponse> {
-        await this.messageService.deleteMessage(mail, id);
-        return { status: 'Message supprimé avec succès' };
+          const res = await this.messageService.deleteMessage(user.email, id);
+          return res
         }
 }
