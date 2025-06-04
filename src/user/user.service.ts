@@ -8,12 +8,43 @@ import * as bcrypt from 'bcrypt';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<User[]> {
-    return this.prisma.user.findMany();
+  async findAll(): Promise<any[]> {
+    const users = await this.prisma.user.findMany({
+      include: {
+        messages: true,
+        participants: {
+          include: {
+            conversation: true,
+          },
+        },
+      },
+    });
+
+    return users.map((user) => ({
+      ...user,
+      conversations: user.participants.map((p) => p.conversation),
+    }));
   }
 
-  async findOne(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { id } });
+  async findOne(id: string): Promise<any | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        messages: true,
+        participants: {
+          include: {
+            conversation: true,
+          },
+        },
+      },
+    });
+
+    if (!user) return null;
+
+    return {
+      ...user,
+      conversations: user.participants.map((p) => p.conversation),
+    };
   }
 
   async create(data: CreateUserInput): Promise<User> {
