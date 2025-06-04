@@ -1,7 +1,6 @@
 import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
 import { Message } from 'src/message/entities/message.entity';
-import { MessageService } from './message.service';
-import { CreateMessageInput } from './message.dto';
+import { CreateMessageInput, ModifyMessageInput } from './message.dto';
 import { RabbitService } from 'src/rabbit/rabbit.service';
 import { MessageResponse } from './dto/message.input';
 import { HttpException, HttpStatus, UseGuards } from '@nestjs/common';
@@ -27,9 +26,18 @@ export class MessageResolver {
     // }
 
     @Mutation(() => MessageResponse)
-    async createMessage(@Args('data') data: CreateMessageInput) {
+    @UseGuards(UserGuard)
+    async createMessage(
+        @Args('data') data: CreateMessageInput,
+        @CurrentUser() user : User
+    ) {
         try {
-        await this.rabbitService.sendNotification(data,"message.create");
+        const payload = {
+            conversationId : data.conversationId,
+            content : data.content,
+            email : user.email
+         }
+        await this.rabbitService.sendNotification(payload,"message.create");
         return { status: 'Message envoyé dans RabbitMQ' };
          } catch (error) {
             throw new HttpException({
@@ -47,6 +55,16 @@ export class MessageResolver {
         @CurrentUser() user : User, 
         ): Promise<MessageResponse> {
           const res = await this.messageService.deleteMessage(user.email, id);
+          return res
+        }
+
+        @Mutation(() => MessageResponse)
+        @UseGuards(UserGuard)
+        async updateMessage(
+        @Args('data') data: ModifyMessageInput,        
+        @CurrentUser() user : User, 
+        ): Promise<MessageResponse> {
+          const res = await this.messageService.updateMessage(data, user.email);
           return res
         }
 }

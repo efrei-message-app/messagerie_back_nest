@@ -1,9 +1,10 @@
 import { Controller, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
-import { CreateMessageInput } from './message.dto';
+import { ModifyMessageInput } from './message.dto';
 import { MessageService } from './message.service';
 import { UserService } from 'src/user/user.service';
 import { MessageResponse } from './dto/message.input';
+import { MessageCreateRabbitMQPayload } from './dto/message.input';
 
 @Controller('message')
 export class MessageController {
@@ -12,15 +13,22 @@ export class MessageController {
       private readonly userService: UserService
     ) {}
       @EventPattern('message.create')
-      async handleIncomingMessage(@Payload() data: CreateMessageInput, @Ctx() context: RmqContext) {
+      async handleIncomingMessage(@Payload() data: MessageCreateRabbitMQPayload, @Ctx() context: RmqContext) {
         try {
             const channel = context.getChannelRef();
             const originalMsg = context.getMessage();
-        
-            await this.messageService.create(data)
 
-            channel.ack(originalMsg)
-            
+            const user = await this.userService.findOneByMail(data.email)
+            if(!user) {
+              console.log(`Cannot insert message from ${data.email}`)
+            }else{
+                await this.messageService.create({
+                  content: data.content, 
+                  conversationId: data.conversationId, 
+                  senderId : user.id})
+
+                channel.ack(originalMsg)
+            }         
         } catch (error) {
             console.log(error)       
         }
@@ -62,4 +70,42 @@ export class MessageController {
         }
 
       }
+
+
+    async updateMessage(data : ModifyMessageInput, email : string) : Promise<MessageResponse>{
+        try {
+
+            const user = await this.userService.findOneByMail(email)
+
+            if(!user) {
+              throw new NotFoundException(`User not found`);
+            }
+
+          // Find message by user and ID
+            let message = await this.messageService.findOne(data.messageId)
+
+            if(!message) {
+              throw new NotFoundException(`Message not found`);
+            }
+
+            const existingUser = message.conversation.participants.findIndex((participant) => participant.id === user.id)
+
+            if(existingUser == -1 ){
+              throw new UnauthorizedException(`Cannot modify a message from a conv you are not joined`);
+            }
+
+            // If not found return error
+            if(message?.sender.id !== user.id){
+              throw new NotFoundException(`Message avec l'email ${email}  et l'id ${message?.id} introuvable`);
+            }
+          // Else 
+            message.content = data.content;
+            await this.messageService.update(message)
+
+            return { status: 'Message modifié avec succès' };
+          
+        } catch (error) {
+           throw error; 
+        }
+    }
 }

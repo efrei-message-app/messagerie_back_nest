@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateMessageInput } from './message.dto';
+import { CreateMessageDB, CreateMessageInput } from './message.dto';
 import { Message } from './entities/message.entity';
 @Injectable()
 export class MessageService {
@@ -42,7 +42,7 @@ export class MessageService {
 
 
 
-  async create(data: CreateMessageInput) {
+  async create(data: CreateMessageDB) {
   return this.prisma.message.create({
     data,
     include: {
@@ -57,6 +57,18 @@ export class MessageService {
     return this.prisma.message.delete({
       where:{
         id : message.id
+      }
+    })
+  }
+
+  async update(message : Message){
+    return this.prisma.message.update({
+      where :{
+        id : message.id
+      }, 
+      data :{
+        content : message.content,
+        updatedAt : new Date()
       }
     })
   }
