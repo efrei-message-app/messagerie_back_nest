@@ -24,7 +24,6 @@ export class RabbitService {
   }
 
   async sendNotification(notification: any, routingKey : string) {
-    console.log(routingKey)
     return this.client.emit(routingKey, notification);
   }
 
