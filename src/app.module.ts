@@ -8,7 +8,6 @@ import { ConfigModule } from '@nestjs/config';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { UserModule } from './user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { ConsumerModule } from './consumer/consumer.module';
 import { RabbitModule } from './rabbit/rabbit.module';
 import { ConversationModule } from './conversation/conversation.module';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -21,7 +20,6 @@ import { join } from 'path';
     HealthModule,
     MessageModule,
     RabbitModule,
-    ConsumerModule, 
     PrismaModule,
     UserModule,
     MessageModule,

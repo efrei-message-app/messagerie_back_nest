@@ -4,6 +4,7 @@ import { MessageService } from './message.service';
 import { CreateMessageInput } from './message.dto';
 import { RabbitService } from 'src/rabbit/rabbit.service';
 import { MessageResponse } from './dto/message.input';
+import { HttpException, HttpStatus } from '@nestjs/common';
 @Resolver(() => Message)
 export class MessageResolver {
     constructor(
@@ -23,7 +24,16 @@ export class MessageResolver {
 
     @Mutation(() => MessageResponse)
     async createMessage(@Args('data') data: CreateMessageInput) {
+        try {
         await this.rabbitService.sendNotification(data,"message.create");
         return { status: 'Message envoyé dans RabbitMQ' };
+         } catch (error) {
+            throw new HttpException({
+            status: HttpStatus.FORBIDDEN,
+            error: 'This is a custom message',
+            }, HttpStatus.FORBIDDEN, {
+            cause: error
+            });
+        }
     }
 }
