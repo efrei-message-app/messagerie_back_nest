@@ -1,4 +1,4 @@
-import { Controller, NotFoundException } from '@nestjs/common';
+import { Controller, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { CreateMessageInput } from './message.dto';
 import { MessageService } from './message.service';
@@ -39,6 +39,12 @@ export class MessageController {
 
             if(!message) {
               throw new NotFoundException(`Message not found`);
+            }
+
+            const existingUser = message.conversation.participants.findIndex((participant) => participant.id === user.id)
+
+            if(existingUser == -1 ){
+              throw new UnauthorizedException(`Cannot delete a message from a conv you are not joined`);
             }
 
             // If not found return error

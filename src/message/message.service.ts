@@ -9,17 +9,38 @@ export class MessageService {
   async findAll(): Promise<any[]> {
     return this.prisma.message.findMany({});
   }
-  async findOne(id: string): Promise<Message | null>{
-    return this.prisma.message.findUnique({
-      where: { id }, 
+
+  async findOne(id: string): Promise<Message | null> {
+    const prismaMessage = await this.prisma.message.findUnique({
+      where: { id },
       include: {
-      sender: true,
-      conversation: {include: {
-          participants: true,
-        }}
-    },
+        sender: true,
+        conversation: {
+          include: {
+            participants: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
     });
+
+    if (!prismaMessage) return null;
+
+    const participants = prismaMessage.conversation.participants.map(p => p.user);
+
+    return {
+      ...prismaMessage,
+      conversation: {
+        ...prismaMessage.conversation,
+        participants, 
+      },
+    } as unknown as Message; 
   }
+
+
 
   async create(data: CreateMessageInput) {
   return this.prisma.message.create({
