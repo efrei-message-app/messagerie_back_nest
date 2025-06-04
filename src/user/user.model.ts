@@ -17,3 +17,5 @@ export class User {
   @Field()
   updatedAt: Date;
 }
+
+

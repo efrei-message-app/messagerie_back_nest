@@ -8,23 +8,24 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  username  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String                   @id @default(uuid())
+  email         String                   @unique
+  username      String
+  password      String
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
 
   messages      Message[]
-  conversations Conversation[] @relation("Participants") // many-to-many
+  participants  ConversationParticipant[]
 }
 
 model Conversation {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String                   @id @default(uuid())
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
 
-  messages     Message[]
-  participants User[]    @relation("Participants") // many-to-many
+  messages      Message[]
+  participants  ConversationParticipant[]
 }
 
 model Message {
@@ -36,6 +37,17 @@ model Message {
   senderId       String
   conversationId String
 
-  sender       User         @relation(fields: [senderId], references: [id])
-  conversation Conversation @relation(fields: [conversationId], references: [id])
+  sender          User         @relation(fields: [senderId], references: [id])
+  conversation    Conversation @relation(fields: [conversationId], references: [id])
+}
+
+model ConversationParticipant {
+  userId         String
+  conversationId String
+
+  user           User         @relation(fields: [userId], references: [id])
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  @@id([userId, conversationId])
+  @@map("ConversationParticipants") // <- nom explicite de la table pivot dans la DB (optionnel)
 }
