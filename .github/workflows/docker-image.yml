@@ -1,0 +1,44 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env: 
+    REGISTRY: ghcr.io
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+        contents: read
+        packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set dynamic tags
+    - id: vars
+      run: |
+          TIMESTAMP=$(date +'%Y%m%d-%H%M')
+          echo "TAG=$TIMESTAMP" >> $GITHUB_ENV
+          echo "IMAGE_NAME=ghcr.io/efrei-message-app/messagerie-back-nest" >> $GITHUB_ENV
+          echo "FULL_TAG=ghcr.io/efrei-message-app/messagerie-back-nest:$TIMESTAMP" >> $GITHUB_ENV
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.CR_PAT }}
+    
+    - name: Build the Docker image
+      run: docker build -t $FULL_TAG -t $IMAGE_NAME:latest .
+
+    - name: Push both tags
+      run: |
+        docker push $FULL_TAG
+        docker push $IMAGE_NAME:latest
