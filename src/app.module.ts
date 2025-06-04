@@ -13,11 +13,13 @@ import { RabbitModule } from './rabbit/rabbit.module';
 import { ConversationModule } from './conversation/conversation.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { join } from 'path';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     
     ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
     HealthModule,
     MessageModule,
     RabbitModule,
@@ -26,12 +28,14 @@ import { join } from 'path';
     UserModule,
     MessageModule,
     ConversationModule,
+    
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
       playground: true,
     }),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService, AppResolver],

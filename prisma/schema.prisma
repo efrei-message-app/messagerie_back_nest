@@ -11,11 +11,12 @@ model User {
   id            String         @id @default(uuid())
   email         String         @unique
   username      String
+  password      String       
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
   messages      Message[]
-  conversations Conversation[] @relation("Participants") // many-to-many
+  conversations Conversation[] @relation("Participants")
 }
 
 model Conversation {
