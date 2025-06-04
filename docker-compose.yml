@@ -36,7 +36,7 @@ services:
 
   api:
     build: .
-    container_name: messagerie_back_nest
+    container_name: ghcr.io/efrei-message-app/messagerie-back-nest:latest
     env_file:
       - .env
     ports:
