@@ -5,22 +5,23 @@ import { CreateMessageInput } from './message.dto';
 import { RabbitService } from 'src/rabbit/rabbit.service';
 import { MessageResponse } from './dto/message.input';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { MessageController } from './message.controller';
 @Resolver(() => Message)
 export class MessageResolver {
     constructor(
-        private readonly messageService: MessageService,
+        private readonly messageService: MessageController,
         private readonly rabbitService : RabbitService
     ) { }
 
-    @Query(() => [Message], { name: 'messages' })
-    findAll() {
-        return this.messageService.findAll();
-    }
+    // @Query(() => [Message], { name: 'messages' })
+    // findAll() {
+    //     return this.messageService.findAll();
+    // }
 
-    @Query(() => Message, { name: 'message' })
-    findOne(@Args('id', { type: () => String }) id: string) {
-        return this.messageService.findOne(id);
-    }
+    // @Query(() => Message, { name: 'message' })
+    // findOne(@Args('id', { type: () => String }) id: string) {
+    //     return this.messageService.findOne(id);
+    // }
 
     @Mutation(() => MessageResponse)
     async createMessage(@Args('data') data: CreateMessageInput) {
@@ -36,4 +37,12 @@ export class MessageResolver {
             });
         }
     }
+        @Mutation(() => MessageResponse)
+        async deleteMessage(
+        @Args('id', { type: () => String }) id: string,
+        @Args('mail', { type: () => String }) mail: string,
+        ): Promise<MessageResponse> {
+        await this.messageService.deleteMessage(mail, id);
+        return { status: 'Message supprimé avec succès' };
+        }
 }

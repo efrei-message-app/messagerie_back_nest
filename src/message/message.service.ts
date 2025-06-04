@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMessageInput } from './message.dto';
+import { Message } from './entities/message.entity';
 @Injectable()
 export class MessageService {
   constructor(private prisma: PrismaService) { }
@@ -8,9 +9,15 @@ export class MessageService {
   async findAll(): Promise<any[]> {
     return this.prisma.message.findMany({});
   }
-  async findOne(id: string) {
+  async findOne(id: string): Promise<Message | null>{
     return this.prisma.message.findUnique({
-      where: { id }
+      where: { id }, 
+      include: {
+      sender: true,
+      conversation: {include: {
+          participants: true,
+        }}
+    },
     });
   }
 
@@ -23,5 +30,13 @@ export class MessageService {
     },
   });
 
+  }
+
+  async delete(message : Message){
+    return this.prisma.message.delete({
+      where:{
+        id : message.id
+      }
+    })
   }
 }
