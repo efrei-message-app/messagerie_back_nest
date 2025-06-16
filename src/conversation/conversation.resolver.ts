@@ -1,34 +1,79 @@
 import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
 import { Conversation } from './entities/conversation.entity';
 import { ConversationService } from './conversation.service';
-import { CreateConversationInput, UpdateConversationInput } from './dto/conversation.input';
+import { NotFoundException, UseGuards } from '@nestjs/common';
+import { UserGuard } from 'src/auth/auth.guard';
+import { CurrentUser } from 'src/auth/auth.decorator';
+import { User } from 'src/user/entities/user.entity';
+import { UserService } from 'src/user/user.service';
 
 @Resolver(() => Conversation)
 export class ConversationResolver {
-    constructor(private readonly conversationService: ConversationService) { }
+    constructor(
+        private readonly conversationService : ConversationService,
+        private readonly userService : UserService,
+    ) { }
 
+    @UseGuards(UserGuard)
     @Query(() => [Conversation], { name: 'conversations' })
-    findAll() {
-        return this.conversationService.findAll();
+    async findAll(@CurrentUser() user : User) {
+                try {
+        // FInd user
+            const currentUser = await this.userService.findOneByMail(user.email);
+            if(!currentUser) {
+              throw new NotFoundException(`User not found`);
+            }
+            
+          const conversations = await this.conversationService.findAll(currentUser.id)  
+
+          if(!conversations){
+            return []
+          }
+
+          return conversations;
+        } catch (error) {
+            throw error; 
+        }
     }
 
+    @UseGuards(UserGuard)
     @Query(() => Conversation, { name: 'conversation' })
-    findOne(@Args('id', { type: () => String }) id: string) {
-        return this.conversationService.findOne(id);
+    async findOne(@Args('id', { type: () => String }) id: string, @CurrentUser() user : User) {
+        try {
+        // FInd user
+            const currentUser = await this.userService.findOneByMail(user.email);
+            if(!currentUser) {
+                throw new NotFoundException(`User not found`);
+            }
+            
+            // Find conversation
+            const conversation = await this.conversationService.findOne(id, currentUser.id)
+
+            if(!conversation){
+                throw new NotFoundException(`Conversation not found`);
+            }
+
+            return conversation;
+        } catch (error) {
+            throw error; 
+        }
     }
 
-    @Mutation(() => Conversation)
-    createConversation(@Args('createConversationInput') createConversationInput: CreateConversationInput) {
-        return this.conversationService.create(createConversationInput);
-    }
+//     @UseGuards(UserGuard)
+//     @Mutation(() => Conversation)
+//     createConversation(@Args('createConversationInput') createConversationInput: CreateConversationInput, @CurrentUser() user : User) {
+//         return this.conversationService.create(createConversationInput);
+//     }
 
-    @Mutation(() => Conversation)
-    updateConversation(@Args('id') id: string, @Args('updateConversationInput') updateConversationInput: UpdateConversationInput) {
-        return this.conversationService.update(id, updateConversationInput);
-    }
+//     @UseGuards(UserGuard)
+//     @Mutation(() => Conversation)
+//     updateConversation(@Args('id') id: string, @Args('updateConversationInput') updateConversationInput: UpdateConversationInput, @CurrentUser() user : User) {
+//         return this.conversationService.update(id, updateConversationInput);
+//     }
 
-    @Mutation(() => Conversation)
-    removeConversation(@Args('id') id: string) {
-        return this.conversationService.remove(id);
-    }
+//     @UseGuards(UserGuard)
+//     @Mutation(() => Conversation)
+//     removeConversation(@Args('id') id: string,@CurrentUser() user : User) {
+//         return this.conversationService.remove(id);
+//     }
 }
