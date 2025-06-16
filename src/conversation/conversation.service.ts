@@ -43,11 +43,7 @@ export class ConversationService {
           },
         },
       },
-      include: {
-        participants: {
-          include: { user: true },
-        },
-            include: {
+        include: {
         participants: {
           include: { 
             user: true
@@ -56,7 +52,6 @@ export class ConversationService {
           messages: {
           include: { sender: true },
         },
-      },
       },
     });
 
