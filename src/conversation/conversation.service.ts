@@ -78,30 +78,13 @@ export class ConversationService {
     });
   }
 
-//   async update(id: string, data: UpdateConversationInput) {
-//     // Supprimer les anciens participants
-//     await this.prisma.conversationParticipant.deleteMany({
-//       where: { conversationId: id },
-//     });
+  async deleteParticipants(id: string) {
+    await this.prisma.conversationParticipant.deleteMany({
+      where: { conversationId: id },
+    });
+  }
 
-//     // Ajouter les nouveaux
-//     if (data.participantIds?.length) {
-//       await this.prisma.conversationParticipant.createMany({
-//         data: data.participantIds.map((userId) => ({
-//           userId,
-//           conversationId: id,
-//         })),
-//       });
-//     }
-
-//     return this.findOne(id);
-//   }
-
-//   async remove(id: string) {
-//     await this.prisma.conversationParticipant.deleteMany({
-//       where: { conversationId: id },
-//     });
-
-//     return this.prisma.conversation.delete({ where: { id } });
-//   }
+  async remove(id: string) {
+    await this.prisma.conversation.delete({ where: { id } });
+  }
 }
