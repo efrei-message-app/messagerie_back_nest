@@ -154,9 +154,28 @@ export class ConversationResolver {
         
     }
 
-    // @UseGuards(UserGuard)
-    // @Mutation(() => Conversation)
-    // removeConversation(@Args('id') id: string,@CurrentUser() user : User) {
-    //     return this.conversationService.remove(id);
-    // }
+    @UseGuards(UserGuard)
+    @Mutation(() => String)
+    async removeConversation(@Args('id') id: string,@CurrentUser() user : User) {
+
+         // FInd user
+        const currentUser = await this.userService.findOneByMail(user.email);
+        if(!currentUser) {
+            throw new NotFoundException(`User not found`);
+        }
+
+        // Find conversation depending id and user
+        const conversation =  await this.conversationService.findOne(id, currentUser.id)
+
+        if(!conversation) {
+            throw new NotFoundException(`Conversation not found`);
+        }
+
+        // Delete conversation
+        await this.conversationService.deleteParticipants(conversation.id)
+
+        await this.conversationService.remove(conversation.id)
+
+        return `conversation ${conversation.id} deleted`
+    }
 }
