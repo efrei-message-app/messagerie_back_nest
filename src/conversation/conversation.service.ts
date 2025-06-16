@@ -64,18 +64,19 @@ export class ConversationService {
   }
 
 
-//   async create(data: CreateConversationInput) {
-//     const conversation = await this.prisma.conversation.create({ data: {} });
+  async createConversation() {
+    const conversation = await this.prisma.conversation.create({ data: {} });
+    return conversation;
+  }
 
-//     await this.prisma.conversationParticipant.createMany({
-//       data: data.participantIds.map((userId) => ({
-//         userId,
-//         conversationId: conversation.id,
-//       })),
-//     });
-
-//     return this.findOne(conversation.id)
-//   }
+  async createParticipantConversation(participants : string[], conversationId : string){
+    await this.prisma.conversationParticipant.createMany({
+      data: participants.map((userId) => ({
+        userId,
+        conversationId: conversationId,
+      })),
+    });
+  }
 
 //   async update(id: string, data: UpdateConversationInput) {
 //     // Supprimer les anciens participants

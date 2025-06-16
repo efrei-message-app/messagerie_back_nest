@@ -6,6 +6,7 @@ import { UserGuard } from 'src/auth/auth.guard';
 import { CurrentUser } from 'src/auth/auth.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
+import { CreateConversationInput, UpdateConversationInput } from './dto/conversation.input';
 
 @Resolver(() => Conversation)
 export class ConversationResolver {
@@ -59,21 +60,45 @@ export class ConversationResolver {
         }
     }
 
-//     @UseGuards(UserGuard)
-//     @Mutation(() => Conversation)
-//     createConversation(@Args('createConversationInput') createConversationInput: CreateConversationInput, @CurrentUser() user : User) {
-//         return this.conversationService.create(createConversationInput);
-//     }
+    @UseGuards(UserGuard)
+    @Mutation(() => Conversation)
+    async createConversation(@Args('createConversationInput') createConversationInput: CreateConversationInput, @CurrentUser() user : User) {
+       try {
+        // FInd user
+        const currentUser = await this.userService.findOneByMail(user.email);
+        if(!currentUser) {
+            throw new NotFoundException(`User not found`);
+        }
 
-//     @UseGuards(UserGuard)
-//     @Mutation(() => Conversation)
-//     updateConversation(@Args('id') id: string, @Args('updateConversationInput') updateConversationInput: UpdateConversationInput, @CurrentUser() user : User) {
-//         return this.conversationService.update(id, updateConversationInput);
-//     }
+        // create conversation
 
-//     @UseGuards(UserGuard)
-//     @Mutation(() => Conversation)
-//     removeConversation(@Args('id') id: string,@CurrentUser() user : User) {
-//         return this.conversationService.remove(id);
-//     }
+        const conversation = await this.conversationService.createConversation();
+
+            const participants = Array.from(new Set([
+            ...createConversationInput.participantIds,
+            currentUser.id,
+            ]));
+
+
+        // assign participants 
+        await this.conversationService.createParticipantConversation(participants, conversation.id)
+
+        return this.conversationService.findOne(conversation.id, currentUser.id);
+       } catch (error) {
+        throw error
+       }
+  
+    }
+
+    // @UseGuards(UserGuard)
+    // @Mutation(() => Conversation)
+    // updateConversation(@Args('id') id: string, @Args('updateConversationInput') updateConversationInput: UpdateConversationInput, @CurrentUser() user : User) {
+    //     return this.conversationService.update(id, updateConversationInput);
+    // }
+
+    // @UseGuards(UserGuard)
+    // @Mutation(() => Conversation)
+    // removeConversation(@Args('id') id: string,@CurrentUser() user : User) {
+    //     return this.conversationService.remove(id);
+    // }
 }
