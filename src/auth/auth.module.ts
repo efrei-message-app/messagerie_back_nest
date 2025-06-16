@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
 import { PrismaModule } from '../prisma/prisma.module';
 import { JwtStrategy } from './jwt.strategy';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [
@@ -19,7 +20,9 @@ import { JwtStrategy } from './jwt.strategy';
         signOptions: { expiresIn: config.get('JWT_EXPIRES_IN') },
       }),
     }),
+    UserModule
   ],
-  providers: [AuthService, AuthResolver, JwtStrategy],
+  providers: [AuthService, AuthResolver, JwtStrategy, JwtModule],
+  exports:[JwtModule]
 })
 export class AuthModule {}

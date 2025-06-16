@@ -1,12 +1,12 @@
 import { InputType, Field, ObjectType } from '@nestjs/graphql';
 
 @InputType()
-export class CreateMessageInput {
+export class MessageCreateRabbitMQPayload {
   @Field()
   content: string;
 
   @Field()
-  senderId: string;
+  email: string;
 
   @Field()
   conversationId: string;
