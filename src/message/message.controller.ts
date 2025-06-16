@@ -72,10 +72,16 @@ export class MessageController {
       }
 
 
-    async updateMessage(data : ModifyMessageInput, email : string) : Promise<MessageResponse>{
+    @EventPattern('message.update')
+    async updateMessage(@Payload() data: ModifyMessageInput, @Ctx() context: RmqContext) {
+    // async updateMessage(data : ModifyMessageInput, email : string) : Promise<MessageResponse>{
+
+        const channel = context.getChannelRef();
+        const originalMsg = context.getMessage();
+
         try {
 
-            const user = await this.userService.findOneByMail(email)
+            const user = await this.userService.findOneByMail(data.email)
 
             if(!user) {
               throw new NotFoundException(`User not found`);
@@ -96,13 +102,13 @@ export class MessageController {
 
             // If not found return error
             if(message?.sender.id !== user.id){
-              throw new NotFoundException(`Message avec l'email ${email}  et l'id ${message?.id} introuvable`);
+              throw new NotFoundException(`Message avec l'email ${data.email}  et l'id ${message?.id} introuvable`);
             }
           // Else 
             message.content = data.content;
             await this.messageService.update(message)
 
-            return { status: 'Message modifié avec succès' };
+            channel.ack(originalMsg)
           
         } catch (error) {
            throw error; 
