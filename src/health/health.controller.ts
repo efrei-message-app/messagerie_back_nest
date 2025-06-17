@@ -23,7 +23,7 @@ export class HealthController {
           transport: Transport.RMQ,
           options: {
             urls: ['amqp://guest:guest@rabbitmq:5672'],
-            queue: 'health-check', // nom arbitraire
+            queue: 'health-check',
             queueOptions: {
               durable: false,
             },
