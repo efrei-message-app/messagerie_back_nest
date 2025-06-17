@@ -5,16 +5,21 @@ import { MessageService } from './message.service';
 import { UserService } from 'src/user/user.service';
 import { MessageResponse } from './dto/message.input';
 import { MessageCreateRabbitMQPayload } from './dto/message.input';
+import { EventsGateway } from 'src/events/events.gateway';
+import { ConversationService } from 'src/conversation/conversation.service';
 
 @Controller('message')
 export class MessageController {
     constructor(
       private readonly messageService: MessageService,
-      private readonly userService: UserService
+      private readonly userService: UserService,
+      private readonly socketService : EventsGateway,
+      private readonly conversationService : ConversationService
     ) {}
       @EventPattern('message.create')
       async handleIncomingMessage(@Payload() data: MessageCreateRabbitMQPayload, @Ctx() context: RmqContext) {
         try {
+            console.log(data.conversationId)
             const channel = context.getChannelRef();
             const originalMsg = context.getMessage();
 
@@ -22,10 +27,30 @@ export class MessageController {
             if(!user) {
               console.log(`Cannot insert message from ${data.email}`)
             }else{
-                await this.messageService.create({
+                const conversation = await this.conversationService.findOne(data.conversationId, user.id)
+
+
+                if(!conversation){
+                  throw new NotFoundException(`Conversation ${data.conversationId} not found`);
+                }
+               const message = await this.messageService.create({
                   content: data.content, 
-                  conversationId: data.conversationId, 
+                  conversationId: conversation.id, 
                   senderId : user.id})
+
+                this.socketService.emitMessageToConversation(data.conversationId, {
+                type : "creation",
+                content: data.content,
+                sender: {
+                  email: user.email,
+                },
+                conversationId: data.conversationId,
+                createdAt: message.createdAt,
+                updatedAt : message.updatedAt
+              });
+
+
+              console.log('message created')
 
                 channel.ack(originalMsg)
             }         
@@ -106,7 +131,20 @@ export class MessageController {
             }
           // Else 
             message.content = data.content;
-            await this.messageService.update(message)
+            const newMessage = await this.messageService.update(message)
+
+
+            this.socketService.emitMessageToConversation(message.conversation.id, {
+                type : "update",
+                content: message.content,
+                sender: {
+                  email: user.email,
+                },
+                conversationId: message.conversation.id,
+                createdAt: newMessage.createdAt,
+                updatedAt : newMessage.updatedAt
+              });
+            
 
             channel.ack(originalMsg)
           
