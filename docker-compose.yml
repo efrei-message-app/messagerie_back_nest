@@ -16,8 +16,7 @@ services:
     ports:
       - '5432:5432' 
   rabbitmq:
-    build: .
-    # image: rabbitmq:3-management-alpine
+    image: rabbitmq:3-management-alpine
     container_name: 'rabbitmq'
     environment:
       RABBITMQ_DEFAULT_USER: guest
@@ -36,7 +35,7 @@ services:
       - rabbitmq-log:/var/log/rabbitmq
 
   api:
-    image: ghcr.io/efrei-message-app/messagerie-back-nest:latest
+    build: .
     container_name: messagerie_back_nest
     env_file:
       - .env
