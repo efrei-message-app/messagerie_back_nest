@@ -5,6 +5,8 @@ import { MessageService } from './message.service';
 import { UserService } from '../user/user.service';
 import { NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { RmqContext } from '@nestjs/microservices';
+import { ConversationService } from 'src/conversation/conversation.service';
+import { EventsGateway } from 'src/events/events.gateway';
 
 describe('MessageController', () => {
   let controller: MessageController;
@@ -37,12 +39,22 @@ describe('MessageController', () => {
     findOneByMail: jest.fn(),
   };
 
+  const conversationServiceMock = {
+    findOne: jest.fn(),
+  };
+
+  const socketServiceMock = {
+    //
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MessageController],
       providers: [
         { provide: MessageService, useValue: messageServiceMock },
         { provide: UserService, useValue: userServiceMock },
+        { provide: ConversationService, useValue: conversationServiceMock },
+        { provide: EventsGateway, useValue: socketServiceMock },
       ],
     }).compile();
 
