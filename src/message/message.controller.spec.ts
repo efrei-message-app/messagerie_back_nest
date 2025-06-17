@@ -44,7 +44,7 @@ describe('MessageController', () => {
   };
 
   const socketServiceMock = {
-    //
+    emitMessageToConversation: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -72,10 +72,13 @@ describe('MessageController', () => {
   describe('handleIncomingMessage', () => {
     it('should create a message if user exists', async () => {
       userService.findOneByMail = jest.fn().mockResolvedValue(mockUser);
+      conversationServiceMock.findOne = jest.fn().mockResolvedValue({ id: 'conv1', participants: [mockUser] });
+
       await controller.handleIncomingMessage(
         { email: 'test@mail.com', content: 'Hello', conversationId: 'conv1' },
         mockContext,
       );
+
       expect(messageService.create).toHaveBeenCalledWith({
         content: 'Hello',
         conversationId: 'conv1',
@@ -142,6 +145,12 @@ describe('MessageController', () => {
 
   describe('updateMessage', () => {
     it('should update a message if user and message are valid', async () => {
+      messageService.update = jest.fn().mockResolvedValue({
+        ...mockMessage,
+        content: 'Updated',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
       userService.findOneByMail = jest.fn().mockResolvedValue(mockUser);
       messageService.findOne = jest.fn().mockResolvedValue(mockMessage);
 
