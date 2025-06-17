@@ -44,6 +44,7 @@ export class MessageController {
                 sender: {
                   email: user.email,
                 },
+                id : message.id,
                 conversationId: data.conversationId,
                 createdAt: message.createdAt,
                 updatedAt : message.updatedAt
@@ -87,6 +88,22 @@ export class MessageController {
             }
           // Else 
             await this.messageService.delete(message)
+
+
+            // Send in ws message to delete
+            this.socketService.emitMessageToConversation(message.conversation.id, {
+                type : "delete",
+                content: message.content,
+                sender: {
+                  email: user.email,
+                },
+                id : message.id,
+                conversationId: message.conversation.id,
+                createdAt: message.createdAt,
+                updatedAt : message.updatedAt
+              });
+            
+
 
             return { status: 'Message supprimé avec succès' };
           
@@ -140,6 +157,7 @@ export class MessageController {
                 sender: {
                   email: user.email,
                 },
+                id : newMessage.id,
                 conversationId: message.conversation.id,
                 createdAt: newMessage.createdAt,
                 updatedAt : newMessage.updatedAt
