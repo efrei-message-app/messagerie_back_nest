@@ -1,19 +1,34 @@
 
 import { Controller, Get } from '@nestjs/common';
-import { HealthCheckService, HttpHealthIndicator, HealthCheck } from '@nestjs/terminus';
+import { HealthCheckService, 
+  HttpHealthIndicator, 
+  HealthCheck, 
+  MicroserviceHealthIndicator } from '@nestjs/terminus';
+import { Transport } from '@nestjs/microservices';
 
 @Controller('health')
 export class HealthController {
   constructor(
     private health: HealthCheckService,
     private http: HttpHealthIndicator,
+    private microservice: MicroserviceHealthIndicator,
   ) {}
-  //A remplacer avec health check de la base de données et de rabbit MQ
   @Get()
   @HealthCheck()
   check() {
     return this.health.check([
       () => this.http.pingCheck('nestjs-docs', 'https://docs.nestjs.com'),
+      () =>
+        this.microservice.pingCheck('rabbitmq', {
+          transport: Transport.RMQ,
+          options: {
+            urls: ['amqp://guest:guest@rabbitmq:5672'],
+            queue: 'health-check', // nom arbitraire
+            queueOptions: {
+              durable: false,
+            },
+          },
+        }),
     ]);
   }
 }
