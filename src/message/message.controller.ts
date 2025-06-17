@@ -44,6 +44,7 @@ export class MessageController {
                 sender: {
                   email: user.email,
                 },
+                id : message.id,
                 conversationId: data.conversationId,
                 createdAt: message.createdAt,
                 updatedAt : message.updatedAt
@@ -96,7 +97,7 @@ export class MessageController {
                 sender: {
                   email: user.email,
                 },
-                messageId : message.id,
+                id : message.id,
                 conversationId: message.conversation.id,
                 createdAt: message.createdAt,
                 updatedAt : message.updatedAt
@@ -156,6 +157,7 @@ export class MessageController {
                 sender: {
                   email: user.email,
                 },
+                id : newMessage.id,
                 conversationId: message.conversation.id,
                 createdAt: newMessage.createdAt,
                 updatedAt : newMessage.updatedAt
