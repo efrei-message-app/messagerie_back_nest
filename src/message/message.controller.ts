@@ -96,6 +96,7 @@ export class MessageController {
                 sender: {
                   email: user.email,
                 },
+                messageId : message.id,
                 conversationId: message.conversation.id,
                 createdAt: message.createdAt,
                 updatedAt : message.updatedAt
