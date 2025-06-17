@@ -64,7 +64,13 @@ export class MessageResolver {
         @Args('data') data: ModifyMessageInput,        
         @CurrentUser() user : User, 
         ): Promise<MessageResponse> {
-          const res = await this.messageService.updateMessage(data, user.email);
-          return res
+
+        const payload : ModifyMessageInput= {
+            messageId : data.messageId,
+            content : data.content,
+            email : user.email
+         }
+        await this.rabbitService.sendNotification(payload,"message.update");
+           return { status: 'Message envoyé dans RabbitMQ' };
         }
 }

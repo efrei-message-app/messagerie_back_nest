@@ -6,13 +6,24 @@ import { CreateConversationInput, UpdateConversationInput } from './dto/conversa
 export class ConversationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(userid : string) {
     const conversations = await this.prisma.conversation.findMany({
+      where: {
+      participants: {
+        some: {
+          userId: userid,
+        },
+      },
+    },
       include: {
         participants: {
-          include: { user: true },
+          include: { 
+            user: true
+          },
         },
-        messages: true,
+          messages: {
+          include: { sender: true },
+        },
       },
     });
 
@@ -22,14 +33,25 @@ export class ConversationService {
     }));
   }
 
-  async findOne(id: string) {
-    const conversation = await this.prisma.conversation.findUnique({
-      where: { id },
-      include: {
+  async findOne(id: string, userId: string) {
+    const conversation = await this.prisma.conversation.findFirst({
+      where: {
+        id,
         participants: {
-          include: { user: true },
+          some: {
+            userId: userId,
+          },
         },
-        messages: true,
+      },
+        include: {
+        participants: {
+          include: { 
+            user: true
+          },
+        },
+          messages: {
+          include: { sender: true },
+        },
       },
     });
 
@@ -41,43 +63,28 @@ export class ConversationService {
     };
   }
 
-  async create(data: CreateConversationInput) {
+
+  async createConversation() {
     const conversation = await this.prisma.conversation.create({ data: {} });
-
-    await this.prisma.conversationParticipant.createMany({
-      data: data.participantIds.map((userId) => ({
-        userId,
-        conversationId: conversation.id,
-      })),
-    });
-
-    return this.findOne(conversation.id); // recharger avec include
+    return conversation;
   }
 
-  async update(id: string, data: UpdateConversationInput) {
-    // Supprimer les anciens participants
+  async createParticipantConversation(participants : string[], conversationId : string){
+    await this.prisma.conversationParticipant.createMany({
+      data: participants.map((userId) => ({
+        userId,
+        conversationId: conversationId,
+      })),
+    });
+  }
+
+  async deleteParticipants(id: string) {
     await this.prisma.conversationParticipant.deleteMany({
       where: { conversationId: id },
     });
-
-    // Ajouter les nouveaux
-    if (data.participantIds?.length) {
-      await this.prisma.conversationParticipant.createMany({
-        data: data.participantIds.map((userId) => ({
-          userId,
-          conversationId: id,
-        })),
-      });
-    }
-
-    return this.findOne(id);
   }
 
   async remove(id: string) {
-    await this.prisma.conversationParticipant.deleteMany({
-      where: { conversationId: id },
-    });
-
-    return this.prisma.conversation.delete({ where: { id } });
+    await this.prisma.conversation.delete({ where: { id } });
   }
 }

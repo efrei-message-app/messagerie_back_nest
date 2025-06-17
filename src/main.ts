@@ -5,19 +5,23 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors({
+    origin: 'http://localhost:4000',
+    credentials: true,
+  });
+
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: ['amqp://rabbitmq:5672'],
-      queue: 'channel_message',
+      urls: [process.env.RABBITMQ_URL!],   
+      queue: process.env.RABBITMQ_QUEUE, 
       queueOptions: { durable: true },
-      noAck : false
-    }
-    });
+      noAck: false,
+    },
+  });
 
-  await app.startAllMicroservices(); 
+  await app.startAllMicroservices();
   await app.listen(3000);
 }
-
 
 bootstrap();

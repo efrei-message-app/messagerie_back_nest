@@ -17,6 +17,7 @@ export class CreateMessageInput  extends MessageInput{
 export class ModifyMessageInput extends MessageInput {
   @Field()
   messageId: string;
+  email : string;
 }
 
 
