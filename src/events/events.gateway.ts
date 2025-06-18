@@ -17,11 +17,11 @@ export class EventsGateway {
   server: Server;
 
   emitMessageToConversation(conversationId: string, message: any) {
-     console.log(`Emitting message to room ${conversationId}`, message);
+     console.log(`${conversationId}`, message);
     this.server.to(conversationId).emit('newMessage', message);
   }
   emitRoomChangesToConversation(conversationId: string, message: any) {
-     console.log(`Emitting new room settings to room ${conversationId}`, message);
+     console.log(` ${conversationId}`, message);
     this.server.to(conversationId).emit('roomSettings', message);
   }
 
