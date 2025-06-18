@@ -7,12 +7,14 @@ import { CurrentUser } from 'src/auth/auth.decorator';
 import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { CreateConversationInput, UpdateConversationInput } from './dto/conversation.input';
+import { EventsGateway } from 'src/events/events.gateway';
 
 @Resolver(() => Conversation)
 export class ConversationResolver {
     constructor(
         private readonly conversationService : ConversationService,
         private readonly userService : UserService,
+        private readonly socketService : EventsGateway
     ) { }
 
     @UseGuards(UserGuard)
@@ -101,7 +103,7 @@ export class ConversationResolver {
     }
 
     @UseGuards(UserGuard)
-    @Mutation(() => Conversation)
+    @Mutation(() => String)
     async updateConversation(@Args('id') id: string, @Args('updateConversationInput') updateConversationInput: UpdateConversationInput, @CurrentUser() user : User) {
         try {
 
@@ -124,7 +126,7 @@ export class ConversationResolver {
 
         // Assign new participants
 
-        if(updateConversationInput?.participantEmails?.length){
+        if(updateConversationInput?.participantEmails?.length && updateConversationInput?.participantEmails?.length !== 0){
             const participants = Array.from(new Set([
                 ...updateConversationInput.participantEmails,
                 currentUser.email,
@@ -139,14 +141,34 @@ export class ConversationResolver {
                 return user.id;
                 })
             );
-            await this.conversationService.createParticipantConversation(userIds, conversation.id)
+
+            // If users are still in room
+                await this.conversationService.createParticipantConversation(userIds, conversation.id)
+                
+                const updatedConv = await this.findOne(conversation.id, currentUser)
+                
+                this.socketService.emitRoomChangesToConversation(conversation.id, {
+                    type : "update",
+                    id : updatedConv.id,
+                    participants : updatedConv.participants.map((user)=>{
+                        return {username : user.username, email : user.email, id : user.id}
+                    }),
+                    createdAt: updatedConv.createdAt,
+                    updatedAt: updatedConv.updatedAt
+                });
+
+                return "Updated"
 
         }else{
-            await this.conversationService.createParticipantConversation([currentUser.id], conversation.id)
+            console.log("here")
+            //  It means nobody is in the room so delete the conversation
+                await this.conversationService.remove(conversation.id)
+                this.socketService.emitRoomChangesToConversation(conversation.id, {
+                    type : "deleted",
+                });
+            return "Updated"        
+        
         }
-
-
-        return await this.conversationService.findOne(conversation.id, currentUser.id)
             
         } catch (error) {
             throw error

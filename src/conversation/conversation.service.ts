@@ -70,7 +70,7 @@ export class ConversationService {
   }
 
   async createParticipantConversation(participants : string[], conversationId : string){
-    await this.prisma.conversationParticipant.createMany({
+    return await this.prisma.conversationParticipant.createMany({
       data: participants.map((userId) => ({
         userId,
         conversationId: conversationId,
@@ -85,6 +85,7 @@ export class ConversationService {
   }
 
   async remove(id: string) {
+    await this.prisma.message.deleteMany({ where: { conversationId: id } });
     await this.prisma.conversation.delete({ where: { id } });
   }
 }
