@@ -1,4 +1,3 @@
-// src/message/message.controller.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { MessageController } from './message.controller';
 import { MessageService } from './message.service';
