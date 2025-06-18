@@ -26,7 +26,7 @@ export class EventsGateway {
   }
 
 
-    // CLients asks for joining chatroom to receive in real time message
+    // Clients asks for joining chatroom to receive in real time message
   @SubscribeMessage('joinRoom')
     handleJoinRoom(@MessageBody() conversationId: string, @ConnectedSocket() client: Socket) {
         console.log(conversationId)

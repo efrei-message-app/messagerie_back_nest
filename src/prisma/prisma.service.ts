@@ -8,7 +8,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   }
 
   async enableShutdownHooks(app: INestApplication) {
-    // Bypass TypeScript with an explicit cast
     (this as any).$on('beforeExit', async () => {
       await app.close();
     });

@@ -1,4 +1,3 @@
-// src/auth/auth.resolver.ts
 import { Resolver, Mutation, Args, ObjectType, Field } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
 

@@ -98,7 +98,6 @@ describe('AuthService', () => {
         id: mockUser.id,
         email: mockUser.email,
         username: mockUser.username,
-        // no password field
       });
       expect(result).not.toHaveProperty('password');
     });
