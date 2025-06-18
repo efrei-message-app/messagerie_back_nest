@@ -26,7 +26,7 @@ jobs:
         node-version: '20'
     
     - name: Install dependencies
-      run: npm install
+      run: npm ci
 
     - name: Set dynamic tags
       id: vars
@@ -44,7 +44,7 @@ jobs:
           password: ${{ secrets.CR_PAT }}
     
     - name: Run Jest tests
-      run: npm test
+      run: npm run test -- --ci --coverage
     
     - name: Build the Docker image
       run: docker build -t $FULL_TAG -t $IMAGE_NAME:latest .

@@ -4,6 +4,7 @@ import { ConversationService } from './conversation.service';
 import { UserService } from 'src/user/user.service';
 import { NotFoundException } from '@nestjs/common';
 import { User } from 'src/user/entities/user.entity';
+import { EventsGateway } from 'src/events/events.gateway';
 
 describe('ConversationResolver', () => {
   let resolver: ConversationResolver;
@@ -16,6 +17,10 @@ describe('ConversationResolver', () => {
     username: 'testuser',
     createdAt: new Date(),
     updatedAt: new Date(),
+  };
+
+  const socketServiceMock = {
+    emitMessageToConversation: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -32,6 +37,7 @@ describe('ConversationResolver', () => {
         ConversationResolver,
         { provide: UserService, useValue: mockUserService },
         { provide: ConversationService, useValue: mockConversationService },
+        { provide: EventsGateway, useValue: socketServiceMock },
       ],
     }).compile();
 
