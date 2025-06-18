@@ -19,7 +19,15 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with: 
+        node-version: '20'
     
+    - name: Install dependencies
+      run: npm Install
+
     - name: Set dynamic tags
       id: vars
       run: |
@@ -34,6 +42,9 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.CR_PAT }}
+    
+    - name: Run Jest tests
+      run: npm test
     
     - name: Build the Docker image
       run: docker build -t $FULL_TAG -t $IMAGE_NAME:latest .
